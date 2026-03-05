@@ -25,7 +25,7 @@ export class ServicesComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.http.get<any>('http://localhost:3000/api/getServices')
+    this.http.get<any>('http://localhost:8082/api/getServices')
       .subscribe(data => {
         console.log(data);
         this.servicesData = data;

@@ -110,7 +110,7 @@ export class RegisterComponent implements OnInit {
 
     if ( this.validation(formValues['name'], formValues['email'], formValues['username'], formValues['password'], formValues['confirmPassword']) ) {
       console.log('User details validated successfully.')
-      this.http.post('http://localhost:3000/api/register',formValues,{headers})
+      this.http.post('http://localhost:8082/api/register',formValues,{headers})
         .subscribe(response => {
           console.log(response);
           confirm("Registration success");

@@ -1,10 +1,51 @@
 package app
 
 import (
+	"fmt"
+	"time"
+
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
+
+	"github.com/rsj-rishabh/urbanClapClone/server/config"
 	"github.com/rsj-rishabh/urbanClapClone/server/app/model"
 )
+func (a *App) InitializeDB() {
 
-// DBMigrate will create and migrate the tables, and then make the some relationships if necessary
+    cfg := config.GetConfig()
+
+    dsn := fmt.Sprintf(
+        "%s:%s@tcp(mysql:3306)/%s?charset=%s&parseTime=True&loc=Local",
+        cfg.DB.Username,
+        cfg.DB.Password,
+        cfg.DB.Name,
+        cfg.DB.Charset,
+    )
+
+    var err error
+
+    for i := 0; i < 30; i++ {
+
+        a.DB, err = gorm.Open(cfg.DB.Dialect, dsn)
+
+        if err == nil {
+
+            // Ping DB to ensure it is ready
+            err = a.DB.DB().Ping()
+
+            if err == nil {
+                fmt.Println("Connected to MySQL")
+                return
+            }
+        }
+
+        fmt.Println("Waiting for MySQL...")
+        time.Sleep(5 * time.Second)
+    }
+
+    panic("Database connection failed")
+}
+
 func (a *App) DBMigrate() {
 	// Drop the table if it exists
 	a.DB.AutoMigrate().DropTable(&model.User{})
@@ -16,30 +57,7 @@ func (a *App) DBMigrate() {
 	a.DB.AutoMigrate(&model.User{}, &model.Service{}, &model.Booking{}, &model.CityServiceMapping{})
 
 	// Create users table
-	a.DB.Create(&model.User{
-		Id:       1,
-		Name:     "Dummy Duck",
-		Username: "dummy",
-		Password: "dumdum",
-		Email:    "dummy@ufl.edu",
-		Gender:   "M",
-	})
-	a.DB.Create(&model.User{
-		Id:       2,
-		Name:     "Buzz Lightyear",
-		Username: "buzz",
-		Password: "busybee",
-		Email:    "buzz@ufl.edu",
-		Gender:   "M",
-	})
-	a.DB.Create(&model.User{
-		Id:       3,
-		Name:     "Snow White",
-		Username: "snow",
-		Password: "abc1234",
-		Email:    "snow@ufl.edu",
-		Gender:   "F",
-	})
+
 
 	// Create services table
 	a.DB.Create(&model.Service{
